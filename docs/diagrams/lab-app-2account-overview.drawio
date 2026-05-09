@@ -1,0 +1,176 @@
+<mxfile host="app.diagrams.net" modified="2026-05-09T13:00:00.000Z" agent="Claude" version="24.7.7">
+  <diagram name="Lab A++ 2-account Overview" id="lab-app-2account">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============================================================ -->
+        <!-- Title -->
+        <!-- ============================================================ -->
+        <mxCell id="title" value="Lab A++ ShopXpress-Pro — 2-account Architecture (chốt 2026-05-09)" style="text;html=1;fontSize=20;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="240" y="20" width="1180" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- Internet User (top) -->
+        <!-- ============================================================ -->
+        <mxCell id="user" value="Internet User&#xa;(browser)" style="shape=mxgraph.aws4.user;fillColor=#232F3E;strokeColor=#FFFFFF;align=center;html=1;fontSize=12;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="780" y="80" width="78" height="78" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- R53 public zone (apex do2602.click) -->
+        <!-- ============================================================ -->
+        <mxCell id="r53_apex" value="Route 53 — apex zone&#xa;do2602.click&#xa;Sub-zone: shopxpress-pro.do2602.click&#xa;Failover routing: primary→A, secondary→B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#BF9000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="190" width="320" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- Account A zone (LEFT) — primary nonprd apse1 Singapore -->
+        <!-- ============================================================ -->
+        <mxCell id="zone_a" value="Account A — 527055790396 — apse1 Singapore (PRIMARY)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="40" y="320" width="780" height="700" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vpc_a" value="VPC shopxpress-pro-nonprd-vpc&#xa;9 subnet (3 public + 3 private-app + 3 private-data)&#xa;1 NAT Regional + IGW" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="380" width="740" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="alb_a" value="ALB IngressGroup&#xa;shopxpress-pro-public&#xa;HTTPS 443 + 80→443 redirect" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="470" width="240" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="acm_a" value="ACM cert wildcard&#xa;*.shopxpress-pro.do2602.click&#xa;+ apex SAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#BF9000;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="470" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="extdns_a" value="ExternalDNS&#xa;auto CRUD R53 record&#xa;TXT owner marker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="560" y="470" width="220" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eks_a" value="EKS cluster shopxpress-pro-nonprd-eks v1.34&#xa;OIDC IdP + IRSA + KMS envelope etcd&#xa;3 NS: dev / stg / prd&#xa;MNG t3.medium 3 node spread 3 AZ&#xa;Addons: vpc-cni Prefix Delegation + kube-proxy + coredns + EBS CSI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="560" width="740" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="apps_a" value="Workload (3 service Go distroless)&#xa;gateway BFF + products read + orders write&#xa;NS prd traffic 100%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="680" width="350" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eso_a" value="ESO controller&#xa;sync SM → K8s Secret&#xa;✅ DONE Sub-comp 9" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="430" y="680" width="200" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vault_a" value="Vault HA (Buổi 8)&#xa;dynamic DB + PKI mTLS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9673A6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="650" y="680" width="150" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="aws_services_a" value="AWS Services account A:&#xa;• Secrets Manager (ESO source)&#xa;• ECR shopxpress-pro/{gateway,products,orders}&#xa;• S3 backend TF state + S3 Velero source bucket&#xa;• KMS CMK envelope EKS secret + S3 + Velero&#xa;• CloudTrail organization trail (delegated admin)&#xa;• Security Hub delegated administrator&#xa;• GuardDuty + Config + Falco DaemonSet&#xa;• IAM Identity Center (Phase 1+) — RBAC + ABAC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=10;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="60" y="770" width="740" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ci_a" value="CI/CD (Buổi 0.7+):&#xa;GHA OIDC IdP A + ArgoCD Pull-based&#xa;ApplicationSet 3 svc × 3 NS = 9 App" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D6B656;fontSize=10;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="60" y="940" width="740" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- Account B zone (RIGHT) — standby DR + cross-account demo apse2 Sydney -->
+        <!-- ============================================================ -->
+        <mxCell id="zone_b" value="Account B — 418553863580 — apse2 Sydney (STANDBY DR + Demo)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=14;fontStyle=1;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="840" y="320" width="780" height="700" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vpc_b" value="VPC shopxpress-pro-prd-dr-vpc (apse2)&#xa;3 subnet đơn giản (chỉ dùng khi DR drill)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="860" y="380" width="740" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eks_b" value="EKS cluster shopxpress-pro-prd-dr-eks v1.34&#xa;1 MNG t3.medium min=0 max=3 desired=0 (SCALE 0 thường)&#xa;Scale up khi DR drill quarterly: 0→3 node trong ~5 phút" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#D79B00;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="460" width="740" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="alb_b" value="ALB B (chỉ active khi drill)&#xa;HTTPS endpoint secondary R53" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#D79B00;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="860" y="560" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="acm_b" value="ACM cert wildcard apse2&#xa;*.shopxpress-pro.do2602.click" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#D79B00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="560" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ecr_b" value="ECR replica B&#xa;auto-replicated từ A&#xa;(registry replication rule apse1→apse2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D79B00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="860" y="640" width="350" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3_velero_b" value="S3 bucket Velero target&#xa;cross-account write từ A&#xa;Backup K8s manifest + PVC snapshot" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D79B00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="640" width="370" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="iam_b" value="IAM cross-account roles:&#xa;• role-velero-write (trust A: Velero pod ở A)&#xa;• role-ecr-pull (trust A CI/CD)&#xa;• role-restore-admin (trust A team manual drill)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="860" y="730" width="740" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="security_b" value="Security Hub member account&#xa;(report finding lên A delegated admin)&#xa;GuardDuty cross-account export&#xa;CloudTrail event ship → A organization trail" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="860" y="830" width="740" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cost_b" value="Cost B dự kiến:&#xa;• Khi không drill: ~$0/tháng (cluster scale 0, ECR replica + S3 lưu trữ minimal)&#xa;• Khi drill quarterly (1-2h/lần): ~$1-2 / drill" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;fontSize=11;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="860" y="930" width="740" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- 5 cross-account flows (numbered) -->
+        <!-- ============================================================ -->
+
+        <!-- Flow 1: Internet User → R53 -->
+        <mxCell id="flow_user_r53" style="endArrow=classic;html=1;rounded=0;fontSize=11;strokeColor=#000000;" edge="1" parent="1" source="user" target="r53_apex">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Flow 2: R53 → ALB A (primary) -->
+        <mxCell id="flow_r53_alb_a" value="① primary&#xa;HTTPS 100%" style="endArrow=classic;html=1;rounded=0;fontSize=11;strokeColor=#0066CC;strokeWidth=2;" edge="1" parent="1" source="r53_apex" target="alb_a">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="180" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Flow 3: R53 → ALB B (secondary failover) -->
+        <mxCell id="flow_r53_alb_b" value="② secondary failover&#xa;khi A health check fail&#xa;(Buổi 18)" style="endArrow=classic;html=1;rounded=0;fontSize=11;strokeColor=#D79B00;strokeWidth=2;dashed=1;" edge="1" parent="1" source="r53_apex" target="alb_b">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1280" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Flow 4: ECR A → ECR B (replication) -->
+        <mxCell id="flow_ecr_replication" value="③ ECR replication&#xa;A push → B auto pull&#xa;(Buổi 16)" style="endArrow=classic;html=1;rounded=0;fontSize=11;strokeColor=#D6B656;strokeWidth=2;" edge="1" parent="1" source="aws_services_a" target="ecr_b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Flow 5: Velero A → S3 B -->
+        <mxCell id="flow_velero" value="④ Velero cross-region&#xa;backup A → S3 B&#xa;(Buổi 17)" style="endArrow=classic;html=1;rounded=0;fontSize=11;strokeColor=#82B366;strokeWidth=2;" edge="1" parent="1" source="apps_a" target="s3_velero_b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Flow 6: A IAM → B IAM (assume role) -->
+        <mxCell id="flow_iam" value="⑤ AssumeRole&#xa;A principal → B role&#xa;(Buổi 16)" style="endArrow=classic;html=1;rounded=0;fontSize=11;strokeColor=#9673A6;strokeWidth=2;" edge="1" parent="1" source="ci_a" target="iam_b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Flow 7: B → A CloudTrail aggregate -->
+        <mxCell id="flow_cloudtrail" value="⑥ CloudTrail org trail&#xa;B event → A aggregate&#xa;(Buổi 19)" style="endArrow=classic;html=1;rounded=0;fontSize=11;strokeColor=#B85450;strokeWidth=2;startArrow=classic;" edge="1" parent="1" source="security_b" target="aws_services_a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============================================================ -->
+        <!-- Legend -->
+        <!-- ============================================================ -->
+        <mxCell id="legend" value="LEGEND&#xa;━━━━━━━━━━━━━━━━━━━━━━━━━&#xa;━━ solid: traffic active&#xa;┄┄ dashed: standby (chỉ active khi drill)&#xa;━━ blue: primary path&#xa;━━ orange: secondary/DR path&#xa;━━ yellow: image flow&#xa;━━ green: backup flow&#xa;━━ purple: IAM cross-account&#xa;━━ red: audit/log aggregation&#xa;&#xa;Status (2026-05-09):&#xa;✅ Account A Sub-comp 0..9 LIVE&#xa;⏳ Account B chưa deploy&#xa;⏳ Phase 4 (Buổi 16-19) pending" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=10;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="40" y="1040" width="380" height="200" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

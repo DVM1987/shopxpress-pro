@@ -1,0 +1,162 @@
+# ====================================================================
+# CI workflow: Terraform fmt + validate + plan + tfsec
+# ====================================================================
+# Trigger:
+#   - PR vào main đụng terraform/** → fmt-check + validate + plan + comment
+#   - push main đụng terraform/**   → fmt-check + validate (no plan)
+#
+# Auth: OIDC (GitHub Actions assume IAM Role via web identity).
+#       KHÔNG dùng AccessKey/SecretKey trong GitHub Secrets.
+#
+# Prerequisites (one-time setup, chưa làm trong Lab này):
+#   1. Account A có IAM OIDC Provider trỏ tới token.actions.githubusercontent.com
+#   2. IAM Role `github-actions-shopxpress-pro-ci` với trust policy cho repo
+#      DVM1987/shopxpress-pro, permission ReadOnlyAccess + S3 state read/write +
+#      DDB lock read/write (cho terraform plan)
+#   3. Sub-comp 00-bootstrap đã apply (S3 bucket + DDB table tồn tại)
+
+name: Terraform CI
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform.yml'
+      - 'Makefile'
+  push:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+
+env:
+  AWS_REGION: ap-southeast-1
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+permissions:
+  id-token: write        # OIDC assume role
+  contents: read
+  pull-requests: write   # comment plan vào PR
+
+jobs:
+  # --------------------------------------------------------------
+  # Job 1: Detect sub-comp folder nào bị đụng → matrix các job sau
+  # --------------------------------------------------------------
+  detect-changes:
+    name: Detect changed sub-components
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.changed.outputs.components }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: changed
+        run: |
+          base="${{ github.event.pull_request.base.sha || 'HEAD~1' }}"
+          changed=$(git diff --name-only "$base" HEAD -- 'terraform/*/' 2>/dev/null \
+            | awk -F/ 'NF>=3 {print $2}' | sort -u \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          if [ -z "$changed" ] || [ "$changed" = "[]" ]; then
+            changed='[]'
+          fi
+          echo "components=$changed" >> "$GITHUB_OUTPUT"
+          echo "Changed sub-components: $changed"
+
+  # --------------------------------------------------------------
+  # Job 2: Format check toàn repo (cheap, chạy luôn không matrix)
+  # --------------------------------------------------------------
+  fmt-check:
+    name: terraform fmt -check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version_file: .terraform-version
+
+      - run: make fmt-check
+
+  # --------------------------------------------------------------
+  # Job 3: Validate + Plan per changed sub-comp (matrix parallel)
+  # --------------------------------------------------------------
+  validate-plan:
+    name: validate + plan / ${{ matrix.component }}
+    needs: [detect-changes, fmt-check]
+    if: needs.detect-changes.outputs.components != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJSON(needs.detect-changes.outputs.components) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::527055790396:role/github-actions-shopxpress-pro-ci
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-${{ matrix.component }}-${{ github.run_id }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version_file: .terraform-version
+
+      - name: terraform init
+        run: make init COMPONENT=${{ matrix.component }}
+
+      - name: terraform validate
+        run: make validate COMPONENT=${{ matrix.component }}
+
+      - name: terraform plan
+        id: plan
+        run: |
+          cd terraform/${{ matrix.component }}
+          set +e
+          terraform plan -no-color -out=tfplan 2>&1 | tee plan.txt
+          plan_exit=${PIPESTATUS[0]}
+          set -e
+          {
+            echo "plan_output<<EOF"
+            tail -c 50000 plan.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          exit "$plan_exit"
+
+      - name: Comment plan on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `### Terraform Plan: \`${{ matrix.component }}\`
+            <details><summary>Show plan</summary>
+
+            \`\`\`hcl
+            ${{ steps.plan.outputs.plan_output }}
+            \`\`\`
+            </details>
+
+            *Triggered by @${{ github.actor }} on commit ${{ github.event.pull_request.head.sha }}*`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+  # --------------------------------------------------------------
+  # Job 4: Security scan tfsec (parallel với validate-plan)
+  # --------------------------------------------------------------
+  tfsec:
+    name: tfsec security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aquasecurity/tfsec-action@v1.0.3
+        with:
+          working_directory: terraform
+          soft_fail: true   # warn không block — production: bỏ flag

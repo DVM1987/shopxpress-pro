@@ -1,0 +1,70 @@
+# ============================================================
+# Terraform
+# ============================================================
+# Local TF working dirs (downloaded providers + modules + state cache)
+**/.terraform/*
+**/.terraform.lock.hcl
+# State files: NEVER commit (chứa secret + dữ liệu nhạy cảm)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+crash.log
+crash.*.log
+# Plan output files (binary plan có thể chứa sensitive)
+*.tfplan
+*.tfplan.*
+# Override files: thường dùng cho local dev, KHÔNG commit
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# CLI config (dev cá nhân, mỗi máy khác nhau)
+.terraformrc
+terraform.rc
+
+# ============================================================
+# Secrets — NEVER commit
+# ============================================================
+# AWS credential dạng file (luôn nằm ~/.aws/, nhưng cảnh giác)
+.aws/credentials
+.aws/config
+*.pem
+*.key
+# Direnv (env var local)
+.envrc
+.env
+.env.*
+!.env.example
+# tfvars có secret (nếu dùng pattern này)
+secret.auto.tfvars
+*.secret.tfvars
+
+# ============================================================
+# Kubernetes
+# ============================================================
+# Kubeconfig (chứa token/cert)
+kubeconfig
+kubeconfig.*
+*.kubeconfig
+# Helm
+charts/
+*.tgz
+
+# ============================================================
+# IDE / Editor
+# ============================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ============================================================
+# OS / Build artifact
+# ============================================================
+Thumbs.db
+node_modules/
+dist/
+build/
+*.log

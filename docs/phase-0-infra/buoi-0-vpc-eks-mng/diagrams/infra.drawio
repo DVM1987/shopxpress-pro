@@ -1,0 +1,112 @@
+<mxfile host="app.diagrams.net" version="24.7.17">
+  <diagram name="Sub-comp 1 VPC" id="vpc-topology">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="ShopXpress-Pro VPC Topology — region ap-southeast-1 — 10.20.0.0/16" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1200" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="region" value="Region: ap-southeast-1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F2F7FC;strokeColor=#147EBA;strokeDashArray=6 6;align=left;verticalAlign=top;fontSize=12;fontStyle=2;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="1200" height="800" as="geometry" />
+        </mxCell>
+
+        <mxCell id="igw" value="Internet Gateway&#10;shopxpress-pro-dev-igw" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=1;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.internet_gateway;" vertex="1" parent="1">
+          <mxGeometry x="600" y="100" width="60" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vpc" value="VPC — shopxpress-pro-dev-vpc — 10.20.0.0/16" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6F2F8;strokeColor=#248814;strokeWidth=2;align=left;verticalAlign=top;fontSize=14;fontStyle=1;spacingLeft=10;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="80" y="190" width="1120" height="640" as="geometry" />
+        </mxCell>
+
+        <!-- AZ-1a -->
+        <mxCell id="az1a" value="AZ ap-southeast-1a" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeDashArray=4 4;align=center;verticalAlign=top;fontSize=12;fontStyle=1;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="100" y="240" width="350" height="570" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pub1a" value="Public subnet 1a&#10;10.20.0.0/24&#10;Tier=public&#10;k8s.io/role/elb=1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="280" width="310" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nat" value="NAT Gateway&#10;shopxpress-pro-dev-nat" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=1;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.nat_gateway;" vertex="1" parent="1">
+          <mxGeometry x="170" y="320" width="50" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eip" value="EIP&#10;nat-eip" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=1;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_ip_addresses;" vertex="1" parent="1">
+          <mxGeometry x="320" y="320" width="50" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="app1a" value="Private-app subnet 1a&#10;10.20.32.0/19&#10;Tier=private-app&#10;k8s.io/role/internal-elb=1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="430" width="310" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="data1a" value="Private-data subnet 1a&#10;10.20.128.0/24&#10;Tier=private-data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="630" width="310" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- AZ-1b -->
+        <mxCell id="az1b" value="AZ ap-southeast-1b" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeDashArray=4 4;align=center;verticalAlign=top;fontSize=12;fontStyle=1;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="475" y="240" width="350" height="570" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pub1b" value="Public subnet 1b&#10;10.20.1.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="495" y="280" width="310" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="app1b" value="Private-app subnet 1b&#10;10.20.64.0/19" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="495" y="430" width="310" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="data1b" value="Private-data subnet 1b&#10;10.20.129.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="495" y="630" width="310" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- AZ-1c -->
+        <mxCell id="az1c" value="AZ ap-southeast-1c" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeDashArray=4 4;align=center;verticalAlign=top;fontSize=12;fontStyle=1;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="850" y="240" width="350" height="570" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pub1c" value="Public subnet 1c&#10;10.20.2.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="870" y="280" width="310" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="app1c" value="Private-app subnet 1c&#10;10.20.96.0/19" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="870" y="430" width="310" height="170" as="geometry" />
+        </mxCell>
+
+        <mxCell id="data1c" value="Private-data subnet 1c&#10;10.20.130.0/24" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="870" y="630" width="310" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- Route Tables (legend bottom) -->
+        <mxCell id="rt-legend" value="Route Tables" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="880" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rt-pub" value="rt-public&#10;0.0.0.0/0 → IGW&#10;10.20.0.0/16 → local (auto)&#10;assoc: pub-1a, pub-1b, pub-1c" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#82B366;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="920" width="380" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rt-app" value="rt-private-app&#10;0.0.0.0/0 → NAT (in public-1a)&#10;10.20.0.0/16 → local (auto)&#10;assoc: app-1a, app-1b, app-1c" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="440" y="920" width="380" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rt-data" value="rt-private-data&#10;NO 0.0.0.0/0 (isolated)&#10;10.20.0.0/16 → local (auto)&#10;assoc: data-1a, data-1b, data-1c" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;align=left;verticalAlign=top;fontSize=11;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="840" y="920" width="380" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Connection arrows -->
+        <mxCell id="igw-vpc" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#248814;strokeWidth=2;" edge="1" parent="1" source="igw" target="vpc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="eip-nat" style="endArrow=classic;html=1;rounded=0;strokeColor=#8C4FFF;strokeWidth=2;dashed=1;" edge="1" parent="1" source="eip" target="nat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

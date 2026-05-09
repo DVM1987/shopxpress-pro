@@ -1,0 +1,75 @@
+# ====================================================================
+# pre-commit hooks — chạy tự động trước mỗi `git commit`
+# ====================================================================
+# Setup (one-time, per dev machine):
+#   brew install pre-commit                    # Mac
+#   pre-commit install                         # cài hook vào .git/hooks
+#   pre-commit run --all-files                 # test toàn repo
+#
+# Skip 1 lần (KHÔNG khuyến khích):
+#   git commit --no-verify -m "..."
+#
+# Update hook version định kỳ:
+#   pre-commit autoupdate
+
+repos:
+  # ---------------- Generic file hygiene ----------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]   # block file > 1MB (tránh commit binary)
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # ---------------- Terraform ----------------
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.96.2
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+        # validate cần `terraform init` chạy trước trong folder
+        args:
+          - --hook-config=--retry-once-with-cleanup=true
+      - id: terraform_tflint
+        args:
+          - --args=--minimum-failure-severity=warning
+      - id: terraform_tfsec
+        # tfsec scan security misconfig (S3 public, SG 0.0.0.0/0, IAM wildcard, ...)
+        args:
+          - --args=--soft-fail   # warn không block (lab); production: bỏ flag này
+      - id: terraform_docs
+        # auto generate Inputs/Outputs section trong README.md per module
+        args:
+          - --hook-config=--path-to-file=README.md
+          - --hook-config=--add-to-existing-file=true
+          - --hook-config=--create-file-if-not-exist=true
+
+  # ---------------- Secret detection ----------------
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args:
+          - --baseline=.secrets.baseline
+        exclude: |
+          (?x)^(
+            \.terraform/.*|
+            .*\.tfstate.*|
+            \.git/.*
+          )$
+
+  # ---------------- Markdown lint ----------------
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: [--disable=MD013, --disable=MD033]   # disable line-length + inline HTML

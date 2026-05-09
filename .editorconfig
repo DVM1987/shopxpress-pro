@@ -1,0 +1,30 @@
+# EditorConfig — keep code style consistent across editors/OS
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Go: gofmt yêu cầu tab cứng
+[*.go]
+indent_style = tab
+
+# Python / Bash: PEP-8 + Google Shell guide
+[*.py]
+indent_size = 4
+
+[*.{sh,bash}]
+indent_size = 4
+
+# Makefile: tab BẮT BUỘC, không space
+[Makefile]
+indent_style = tab
+
+# Markdown: 2 space cuối dòng = line break, KHÔNG trim
+[*.md]
+trim_trailing_whitespace = false

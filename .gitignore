@@ -13,6 +13,9 @@ crash.*.log
 # Plan output files (binary plan có thể chứa sensitive)
 *.tfplan
 *.tfplan.*
+# Plan file không có extension (terraform plan -out=tfplan)
+tfplan
+tfplan.*
 # Override files: thường dùng cho local dev, KHÔNG commit
 override.tf
 override.tf.json

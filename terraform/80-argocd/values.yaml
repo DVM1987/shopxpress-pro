@@ -1,0 +1,82 @@
+## ArgoCD Helm values — Lab A++ Sub-comp 0.7.5 Phase B hands-on
+## Chart: argo/argo-cd 9.5.12 → app v3.4.1
+## Mode: non-HA (1 replica per component, ~6 pod, ~1.5 GB RAM)
+## TLS: ALB terminate at IngressGroup `shopxpress-pro-public`, pod plain HTTP
+
+global:
+  domain: argocd.shopxpress-pro.do2602.click
+  addPrometheusAnnotations: true
+
+## Redis non-HA (default plain pod, KHÔNG bật redis-ha)
+redis:
+  enabled: true
+
+redis-ha:
+  enabled: false
+
+## Application Controller — StatefulSet, 1 replica non-HA
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+## Repo Server — clone Git, render Helm/Kustomize
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+## API + UI server
+server:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+  ## Service kept ClusterIP — exposure via Ingress (separate manifest)
+  service:
+    type: ClusterIP
+
+## ApplicationSet Controller — bật cho Sub-comp 0.7.7 matrix 9 App
+applicationSet:
+  enabled: true
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 256Mi
+
+## Notifications Controller — Lab A++ skip (alert Slack chưa cần)
+notifications:
+  enabled: false
+
+## Dex SSO — Lab A++ tắt, login admin local đủ; bật sau khi cần GitHub OAuth
+dex:
+  enabled: false
+
+## ArgoCD ConfigMap params — KEY chốt: server.insecure=true
+## Lý do: ALB terminate TLS, pod chạy plain HTTP nội bộ; nếu để default pod cũng
+## redirect HTTP→HTTPS thì gặp loop (ALB redirect + pod redirect = double redirect fail)
+configs:
+  params:
+    server.insecure: true
+
+  cm:
+    ## Reconcile loop polling 3 phút (default 180s) — Sub-comp 0.7.5 chỉ poll,
+    ## webhook để Sub-comp 0.7.9 demo DORA lead time giảm
+    timeout.reconciliation: 180s
+
+    ## URL UI (dùng cho generated link UI, email notification, OIDC redirect)
+    url: https://argocd.shopxpress-pro.do2602.click

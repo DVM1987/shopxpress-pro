@@ -1,0 +1,49 @@
+## ArgoCD Ingress — Lab A++ Sub-comp 0.7.5 Phase B hands-on
+## Expose argocd-server qua ALB IngressGroup `shopxpress-pro-public` (share ALB)
+## TLS terminate ở ALB (ACM wildcard), backend pod plain HTTP (server.insecure: true)
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server
+  namespace: argocd
+  annotations:
+    ## IngressGroup share ALB — pattern senior, tiết kiệm $16/tháng/Ingress
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: shopxpress-pro-public
+    alb.ingress.kubernetes.io/group.order: "10"
+
+    ## Listener 80 + 443, ALB tự redirect 80→443 (annotation ssl-redirect)
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+
+    ## ACM cert wildcard *.shopxpress-pro.do2602.click ISSUED apse1
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:527055790396:certificate/ab6091a4-c24c-42bb-b55f-cc2aaa6997b5
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+
+    ## Backend pod plain HTTP (vì server.insecure: true trong values.yaml)
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+
+    ## ExternalDNS auto-create A record argocd.shopxpress-pro.do2602.click → ALB
+    external-dns.alpha.kubernetes.io/hostname: argocd.shopxpress-pro.do2602.click
+
+    ## Tags ALB đồng bộ tagging convention Lab A++
+    alb.ingress.kubernetes.io/tags: Project=shopxpress-pro,Environment=nonprd,Component=ingress-public,ManagedBy=helm,Owner=devops
+
+spec:
+  ingressClassName: alb
+  rules:
+    - host: argocd.shopxpress-pro.do2602.click
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80

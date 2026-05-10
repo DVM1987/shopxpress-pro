@@ -47,6 +47,22 @@ spec:
       # Project ranh giới quyền — KHÔNG dùng default.
       project: shopxpress-pro
 
+      # ExternalSecret CRD có server-side defaults (set bởi K8s API server từ
+      # OpenAPI schema, KHÔNG belong manager nào). Chart Git không khai →
+      # ArgoCD diff structural OutOfSync (pod vẫn Healthy). managedFieldsManagers
+      # không match (ESO controller chỉ own finalizers). Phải liệt kê 5 jsonPointer
+      # đúng path. RespectIgnoreDifferences=true (syncOptions) để selfHeal
+      # không revert các field này.
+      ignoreDifferences:
+        - group: external-secrets.io
+          kind: ExternalSecret
+          jsonPointers:
+            - /spec/target/deletionPolicy
+            - /spec/data/0/remoteRef/conversionStrategy
+            - /spec/data/0/remoteRef/decodingStrategy
+            - /spec/data/0/remoteRef/metadataPolicy
+            - /spec/data/0/remoteRef/nullBytePolicy
+
       source:
         repoURL: https://github.com/DVM1987/shopxpress-pro-deploy.git
         targetRevision: main
@@ -78,6 +94,9 @@ spec:
           - ServerSideApply=true
           # ApplyOutOfSyncOnly=true: skip resource đã match Git (chỉ apply diff).
           - ApplyOutOfSyncOnly=true
+          # RespectIgnoreDifferences=true: selfHeal KHÔNG revert field bị
+          # ignoreDifferences match (ngược lại sẽ fight với ESO controller).
+          - RespectIgnoreDifferences=true
         retry:
           # Retry 5 lần nếu sync fail (image pull pending, ClusterSecretStore
           # chưa ready,...) backoff exponential.

@@ -1,0 +1,88 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: shopxpress-pro
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: shopxpress-pro
+    app.kubernetes.io/managed-by: terraform
+spec:
+  # goTemplate=true: dùng Go template syntax (sprig functions) thay vì legacy
+  # fasttemplate. Cho phép `{{- if eq .service "gateway" }}` cho sync-wave conditional.
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+
+  generators:
+    # Matrix generator — tích Descartes 2 list, ra 9 cặp {service, env}.
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - service: gateway
+                - service: products
+                - service: orders
+          - list:
+              elements:
+                - env: dev
+                - env: stg
+                - env: prd
+
+  template:
+    metadata:
+      # Tên Application: <service>-<env> (vd gateway-dev, products-prd).
+      # Match release name của Helm chart trong repo deploy → fullname include trùng.
+      name: '{{.service}}-{{.env}}'
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: '{{.service}}'
+        environment: '{{.env}}'
+      annotations:
+        # Sync wave: products+orders sync trước (wave 0), gateway sau (wave 1).
+        # Lý do: gateway BFF gọi products/orders qua DNS, đợi 2 backend ready
+        # tránh CrashLoop vì DNS resolve fail lần đầu.
+        argocd.argoproj.io/sync-wave: '{{ if eq .service "gateway" }}1{{ else }}0{{ end }}'
+
+    spec:
+      # Project ranh giới quyền — KHÔNG dùng default.
+      project: shopxpress-pro
+
+      source:
+        repoURL: https://github.com/DVM1987/shopxpress-pro-deploy.git
+        targetRevision: main
+        # Path tới chart Helm trong repo deploy.
+        path: services/{{.service}}
+        helm:
+          # Cascade values: base (values.yaml) + per-env override (values-<env>.yaml).
+          # ArgoCD merge 2 file theo thứ tự, file sau override file trước.
+          valueFiles:
+            - values.yaml
+            - values-{{.env}}.yaml
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.env}}'
+
+      syncPolicy:
+        automated:
+          # prune=true: xoá K8s resource khi Git xoá khỏi chart (ko để rác).
+          prune: true
+          # selfHeal=true: drift back về Git nếu ai đó kubectl edit thủ công.
+          selfHeal: true
+        syncOptions:
+          # CreateNamespace=false: namespace dev/stg/prd đã do TF tạo (main.tf).
+          # Dùng=true sẽ duplicate ownership, conflict khi destroy.
+          - CreateNamespace=false
+          # ServerSideApply=true: K8s server merge field-by-field, tránh
+          # last-writer-wins khi LBC controller bổ sung annotation runtime.
+          - ServerSideApply=true
+          # ApplyOutOfSyncOnly=true: skip resource đã match Git (chỉ apply diff).
+          - ApplyOutOfSyncOnly=true
+        retry:
+          # Retry 5 lần nếu sync fail (image pull pending, ClusterSecretStore
+          # chưa ready,...) backoff exponential.
+          limit: 5
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 3m

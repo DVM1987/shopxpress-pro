@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: shopxpress-pro
+  namespace: argocd
+  finalizers:
+    # Chặn xoá AppProject khi còn Application reference (orphan protection).
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    app.kubernetes.io/name: shopxpress-pro
+    app.kubernetes.io/managed-by: terraform
+spec:
+  description: Lab A++ workload microservice (gateway + products + orders) GitOps boundary
+
+  # Whitelist Git repo nguồn — chỉ cho pull từ repo manifest deploy.
+  # Bot/dev đẩy commit vào repo khác → ArgoCD reject với lỗi "repo not permitted".
+  sourceRepos:
+    - https://github.com/DVM1987/shopxpress-pro-deploy.git
+
+  # Whitelist destination — cluster local + 3 namespace dev/stg/prd.
+  # `https://kubernetes.default.svc` = cluster ArgoCD đang chạy (in-cluster).
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: dev
+    - server: https://kubernetes.default.svc
+      namespace: stg
+    - server: https://kubernetes.default.svc
+      namespace: prd
+
+  # Cluster-scoped resource cho phép — '*' để chart phát sinh CSS/CRD nếu cần.
+  # Mặc định empty = block toàn bộ cluster-scoped, sẽ fail ESO ClusterSecretStore.
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  # Namespace-scoped resource cho phép — Deployment/Service/Ingress/SA/ExternalSecret.
+  # '*' để chart Helm 0.7.6 render bất kỳ kind nào hợp lệ trong dev/stg/prd.
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+
+  # Roles RBAC trong project (để trống — quản lý qua ArgoCD ConfigMap RBAC chung).
+  # Phase sau (Sub-comp 0.7.10 RBAC) sẽ thêm role `dev-readonly` + `devops-admin`.
+  roles: []

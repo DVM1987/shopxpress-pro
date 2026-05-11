@@ -3,6 +3,8 @@
 > **Mục tiêu**: luyện phỏng vấn vị trí DevOps/SRE Senior 5+ ($1500-2500 range), dùng Lab A++ ShopXpress-Pro làm STAR portfolio.
 >
 > **Pivot**: 2026-05-10 — sau khi đóng Buổi 0.7.9 DORA, chuyển sang khai thác sâu Sub-comp 0..9 + 0.7.x đã build thay vì tiếp Phase 1 Security.
+>
+> **Update 2026-05-11**: thêm **roadmap 2 tháng** (56 ngày) — xem [`roadmap-2-month.md`](./roadmap-2-month.md). File này (README) ghi 4 câu đã demo + tiến độ session ngắn. File roadmap ghi plan từng ngày D1-D56.
 
 ---
 

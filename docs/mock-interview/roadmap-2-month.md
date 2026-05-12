@@ -33,8 +33,8 @@
 | Ngày | Chủ đề | Học mới | Ôn |
 |---|---|---|---|
 | **D1** Mon | Pod lifecycle | Q1-Q5: 5 phase Pod / Init vs Sidecar / terminationGracePeriod / restartPolicy / Exit code (0/1/137/139/143) | — |
-| **D2** Tue | Probes | Q6-Q10: readiness vs liveness vs startup / HTTP/TCP/Exec / failureThreshold math / probe gây CrashLoop / sidecar race | D1 |
-| **D3** Wed | Service + Endpoints | Q11-Q15: 4 type Service / kube-proxy iptables vs IPVS / Endpoints vs EndpointSlice v1.33+ / DNS cluster.local / Headless vs ClusterIP | D2 |
+| **D2** Tue | Service + Networking ⬅ SWAPPED 2026-05-12 | Q6-Q10: ClusterIP/NodePort/LoadBalancer + LBC IP mode / kube-proxy iptables vs IPVS / Endpoints vs EndpointSlice / DNS cluster.local + ndots / Headless StatefulSet | D1 |
+| **D3** Wed | Probes ⬅ SWAPPED 2026-05-12 | Q11-Q15: readiness vs liveness vs startup / HTTP/TCP/Exec / failureThreshold math / probe gây CrashLoop / sidecar race | D2 |
 | **D4** Thu | Deployment + Rolling | Q16-Q20: maxSurge/maxUnavailable / rollback strategy / revisionHistoryLimit / immutable selector pitfall / Recreate strategy khi nào | D3 |
 | **D5** Fri | Debug 5-method | Q21-Q25: CrashLoopBackOff / OOMKilled exit 137 / ImagePullBackOff / Pending (scheduling fail) / Evicted (DiskPressure) | D4 |
 | **D6** Sat | Mock 30 phút | 6 câu random Q1-Q25 + em chấm gap | D5 |
